@@ -18,7 +18,8 @@ namespace SGP_Aplicacion.Controllers
     public class IncidenciaController : BaseController
     {
         public IncidenciaController(ISessionFactory factory,
-            IHostingEnvironment hstv) : base(factory) {
+            IHostingEnvironment hstv) : base(factory)
+        {
             _hstv = hstv;
         }
 
@@ -105,6 +106,36 @@ namespace SGP_Aplicacion.Controllers
                         await tx.RollbackAsync();
                         return StatusCode(500, ex.Message);
                     }
+                }
+            }
+
+            return Ok(true);
+        }
+
+        [HttpPost("Delete")]
+        public async Task<IActionResult> Delete([FromBody] Incidencia[] incidencias)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            using (var sn = factory.OpenSession())
+            {
+                try
+                {
+                    foreach (var item in incidencias)
+                    {
+                        await sn.CreateSQLQuery("Usp_DeleteIncidencia :IdUsuario, :Latitud, :Longitud")
+                            .SetParameter("IdUsuario", item.Id)
+                            .SetParameter("Latitud", item.Latitud)
+                            .SetParameter("Longitud", item.Longitud)
+                            .ExecuteUpdateAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, ex.Message);
                 }
             }
 

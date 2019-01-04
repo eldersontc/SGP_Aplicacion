@@ -21,7 +21,6 @@ namespace SGP_Aplicacion.Models
             Map(x => x.Version);
             Map(x => x.Serial);
             Map(x => x.UUID);
-            Map(x => x.SIM);
         }
     }
 }

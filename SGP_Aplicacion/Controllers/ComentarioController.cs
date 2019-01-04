@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NHibernate;
+using NHibernate.Transform;
 using SGP_Aplicacion.Models;
 
 namespace SGP_Aplicacion.Controllers
@@ -41,6 +42,16 @@ namespace SGP_Aplicacion.Controllers
 
                         sn.Save(comentario);
 
+                        string[] palabras = comentario.Descripcion.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        foreach (var palabra in palabras)
+                        {
+                            sn.Save(new Palabra {
+                                IdComentario = comentario.Id,
+                                Texto = palabra
+                            });
+                        }
+
                         await tx.CommitAsync();
                     }
                     catch (Exception ex)
@@ -52,6 +63,27 @@ namespace SGP_Aplicacion.Controllers
             }
 
             return Ok(true);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            IList<Comentario> lista;
+
+            try
+            {
+                using (var sn = factory.OpenSession())
+                {
+                    lista = await sn.CreateSQLQuery("Usp_GetComentarios")
+                        .SetResultTransformer(Transformers.AliasToBean<Comentario>())
+                        .ListAsync<Comentario>();
+                    return Ok(lista);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

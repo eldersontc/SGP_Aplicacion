@@ -18,6 +18,5 @@ namespace SGP_Aplicacion.Models
         public string Version { get; set; }
         public string Serial { get; set; }
         public string UUID { get; set; }
-        public string SIM { get; set; }
     }
 }

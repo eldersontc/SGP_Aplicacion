@@ -14,6 +14,7 @@ namespace SGP_Aplicacion.Models
             Map(x => x.Alias);
             Map(x => x.Password);
             Map(x => x.Perfil);
+            Map(x => x.Eliminado);
         }
     }
 }

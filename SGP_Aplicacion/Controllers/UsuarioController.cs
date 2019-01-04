@@ -37,7 +37,9 @@ namespace SGP_Aplicacion.Controllers
             using (var sn = factory.OpenSession())
             {
                 _usuario = await sn.Query<Usuario>()
-                    .Where(x => x.Alias.Equals(usuario.Alias) && x.Password.Equals(usuario.Password))
+                    .Where(x => x.Alias.Equals(usuario.Alias) 
+                    && x.Password.Equals(usuario.Password)
+                    && !x.Eliminado)
                     .FirstOrDefaultAsync();
             }
 
@@ -58,7 +60,7 @@ namespace SGP_Aplicacion.Controllers
             {
                 using (var sn = factory.OpenSession())
                 {
-                    lista = await sn.Query<Usuario>().ToListAsync();
+                    lista = await sn.Query<Usuario>().Where(x => !x.Eliminado).ToListAsync();
                     return Ok(lista);
                 }
             }
@@ -82,6 +84,7 @@ namespace SGP_Aplicacion.Controllers
                 {
                     try
                     {
+                        usuario.Eliminado = false;
                         sn.Save(usuario);
 
                         await tx.CommitAsync();
@@ -116,6 +119,7 @@ namespace SGP_Aplicacion.Controllers
                 {
                     try
                     {
+                        usuario.Eliminado = false;
                         sn.SaveOrUpdate(usuario);
 
                         await tx.CommitAsync();
@@ -145,7 +149,8 @@ namespace SGP_Aplicacion.Controllers
                 {
                     try
                     {
-                        sn.Delete(new Usuario { Id = id });
+                        var usuario = sn.Get<Usuario>(id);
+                        usuario.Eliminado = true;
 
                         await tx.CommitAsync();
                     }
